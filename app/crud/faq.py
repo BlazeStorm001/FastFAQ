@@ -1,8 +1,11 @@
-# app/crud/faq.py
+from google.cloud import translate_v2 as translate
 from sqlalchemy.orm import Session
 from app.models.faq import FAQ, FAQTranslation
 from app.config import DEFAULT_LANGUAGES
 from app.schemas.faq import FAQCreate
+
+# Initialize the Google Translate API client
+translate_client = translate.Client()
 
 def create_faq(db: Session, faq: FAQCreate):
     # Insert into FAQ table
@@ -11,19 +14,27 @@ def create_faq(db: Session, faq: FAQCreate):
     db.commit()
     db.refresh(new_faq)
 
-    # # Insert translations into FAQTranslation table
-    # for lang in DEFAULT_LANGUAGES:
-    #     if lang != faq.language:
-    #         translated_question = translate(faq.question, lang)
-    #         translated_answer = translate(faq.answer, lang)
-    #         faq_translation = FAQTranslation(
-    #             faq_id=new_faq.id, language=lang, question=translated_question, answer=translated_answer
-    #         )
-    #         db.add(faq_translation)
+    # Insert translations into FAQTranslation table
+    for lang in DEFAULT_LANGUAGES:
+        if lang != faq.language:
+            # Translate the question and answer directly including HTML
+            translated_question = translate_text(faq.question, lang)
+            translated_answer = translate_text(faq.answer, lang)
+            print(translated_answer)
+            print(translated_question)
+            # Create and insert the translation entry
+            faq_translation = FAQTranslation(
+                faq_id=new_faq.id, 
+                language=lang, 
+                question=translated_question, 
+                answer=translated_answer
+            )
+            db.add(faq_translation)
     
     db.commit()
     return new_faq
 
-# def translate(text: str, language: str) -> str:
-#     # Translation logic here (for now, just append language)
-#     return f"{text} in {language}"
+def translate_text(text: str, target_language: str) -> str:
+    """Translates the given HTML text into the target language using Google Cloud Translation API."""
+    result = translate_client.translate(text, target_language=target_language)
+    return result['translatedText'] 

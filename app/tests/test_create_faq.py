@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.database.session import SessionLocal
-from app.models.faq import FAQ
+from app.models.faq import FAQ, FAQTranslation
 
 client = TestClient(app)
 
@@ -17,12 +17,12 @@ def db_session():
 
 
 def test_create_faq(db_session):
-    from pdb import set_trace
-    set_trace()
+    # from pdb import set_trace 
+    # set_trace()
     # Prepare the data for the FAQ creation
     faq_data = {
-        "question": "What is Python?",
-        "answer": "Python is a programming language.",
+        "question": "What is my name?",
+        "answer": "My name is <b>John Doe</b>",
         "language": "en"
     }
 
@@ -34,23 +34,39 @@ def test_create_faq(db_session):
     assert response.json()["question"] == faq_data["question"]
     assert response.json()["answer"] == faq_data["answer"]
 
-    # Check if the FAQ is actually inserted into the database
+    # Check if the FAQ is inserted into the database
     faq_in_db = db_session.query(FAQ).filter(FAQ.question == faq_data["question"]).first()
 
-   
     # Assert that the FAQ was inserted into the database
     assert faq_in_db is not None
     assert faq_in_db.question == faq_data["question"]
     assert faq_in_db.answer == faq_data["answer"]
-    
-    # After the test, the transaction will be rolled back, so no changes will persist in the database
 
-    # Cleanup: Delete test entry
+    # Check if FAQTranslation entries are created
+    faq_translations = db_session.query(FAQTranslation).filter(FAQTranslation.faq_id == faq_in_db.id).all()
+
+    assert faq_translations is not None
+    assert len(faq_translations) > 0  # Ensure at least one translation exists
+    for translation in faq_translations:
+        assert translation.language != faq_data["language"]  # Ensure translations are in different languages
+        assert translation.question is not None
+        assert translation.answer is not None
+
+    # Cleanup: Delete FAQTranslation entries first (to maintain foreign key constraints)
+    for translation in faq_translations:
+        db_session.delete(translation)
+
+    # Cleanup: Delete FAQ entry
     db_session.delete(faq_in_db)
     db_session.commit()
-     # Debugging
+
+    # Debugging
     print(f"Total records in the FAQ table: {len(db_session.query(FAQ).all())}")
-    
+    print(f"Total records in the FAQTranslation table: {len(db_session.query(FAQTranslation).all())}")
+
     # Ensure deletion
-    faq_from_db = db_session.query(FAQ).filter(FAQ.question == "What is FastAPI?").first()
+    faq_from_db = db_session.query(FAQ).filter(FAQ.question == faq_data["question"]).first()
     assert faq_from_db is None  # Entry should be deleted
+
+    faq_translations_after_delete = db_session.query(FAQTranslation).filter(FAQTranslation.faq_id == faq_in_db.id).all()
+    assert len(faq_translations_after_delete) == 0  # Ensure translations are deleted
