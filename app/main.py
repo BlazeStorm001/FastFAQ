@@ -1,6 +1,9 @@
-from fastapi import FastAPI
 from app.database.session import engine, Base
-from app.models.faq import FAQ, FAQTranslation
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from app.dependencies import get_db
+from app.schemas.faq import FAQCreate, FAQ
+from app.crud.faq import create_faq
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -8,6 +11,12 @@ app = FastAPI()
 # Create tables
 Base.metadata.create_all(bind=engine)
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the FAQ API"}
+
+@app.post("/faqs/", response_model=FAQ)
+def create_faq_endpoint(faq: FAQCreate, db: Session = Depends(get_db)):
+    return create_faq(db, faq)
+
+
+
+
+
