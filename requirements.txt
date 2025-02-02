@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+sqlalchemy
+databases
+pydantic
+alembic
+python-multipart
+redis
+fastapi-cache2
+aioredis
+googletrans==4.0.0-rc1
+python-dotenv
+jinja2
+pytest
+httpx
