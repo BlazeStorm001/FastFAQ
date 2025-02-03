@@ -33,22 +33,22 @@ def create_faq(db: Session, faq: FAQCreate):
 
             # print(f"Translated question ({lang}): {translated_question}")
             # print(f"Translated answer ({lang}): {translated_answer}")
-            # from pdb import set_trace 
+            # from pdb import set_trace
             # set_trace()
-    
+
             # Create and insert the translation entry
             faq_translation = FAQTranslation(
-                faq_id=new_faq.id, 
-                language=lang, 
-                question=translated_question, 
+                faq_id=new_faq.id,
+                language=lang,
+                question=translated_question,
                 answer=translated_answer
             )
             db.add(faq_translation)
-    
+
     db.commit()
     return new_faq
 
 def translate_text(text: str, target_language: str) -> str:
     """Translates the given HTML text into the target language using Google Cloud Translation API."""
     result = translate_client.translate(text, target_language=target_language)
-    return result['translatedText'] 
+    return result['translatedText']

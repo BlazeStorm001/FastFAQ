@@ -11,7 +11,6 @@ databases==0.9.0
 exceptiongroup==1.2.2
 fastapi==0.115.8
 fastapi-cache2==0.2.2
-googletrans
 greenlet==3.1.1
 h11==0.9.0
 h2==3.2.0
@@ -47,4 +46,6 @@ typing_extensions==4.12.2
 tzdata==2025.1
 uvicorn==0.34.0
 google-cloud-translate
+ruff
+pre-commit
 

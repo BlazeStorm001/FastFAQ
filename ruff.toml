@@ -1,0 +1,8 @@
+line-length = 150
+exclude = [
+    ".venv",
+    ".pytest_cache",
+    "__pycache__"
+]
+select = ["E", "F", "W"]
+

@@ -8,12 +8,12 @@ class FAQ(Base):
     One FAQ can have multiple translations in different languages.
     """
     __tablename__ = 'faqs'  # Table name in the database
-    
+
     id = Column(Integer, primary_key=True, index=True)
     question = Column(Text, nullable=False)
     answer = Column(Text, nullable=False)
     language = Column(String(10), default='en', nullable=False)  # Default to English
-    
+
     translations = relationship('FAQTranslation', back_populates='faq')
 
 class FAQTranslation(Base):
@@ -22,7 +22,7 @@ class FAQTranslation(Base):
     Each translation is linked to a single FAQ and represents the FAQ in a different language.
     """
     __tablename__ = 'faq_translations'
-    
+
     id = Column(Integer, primary_key=True, index=True)
     faq_id = Column(Integer, ForeignKey('faqs.id'), nullable=False)
     language = Column(String(10), nullable=False)

@@ -36,7 +36,7 @@ def test_create_faq(db_session):
     }
 
     # Send POST request to create FAQ
-    response = client.post("/faqs/", json=faq_data)
+    response = client.post("/api/faqs/", json=faq_data)
     # Assert the response status code
     assert response.status_code == 201
     assert response.json()["question"] == faq_data["question"]
