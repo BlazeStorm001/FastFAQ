@@ -1,7 +1,6 @@
-import pytest
 from fastapi.testclient import TestClient
 from app.main import app
-from app.database.session import SessionLocal
+
 from app.models.faq import FAQ, FAQTranslation
 
 client = TestClient(app)
@@ -18,13 +17,13 @@ EXPECTED_TRANSLATIONS = {
 }
 
 
-@pytest.fixture(scope="module")
-def db_session():
-    """Creates a new database session for a test and ensures cleanup after the test."""
-    session = SessionLocal()
-    yield session  # Provide the session to the test
-    session.rollback()  # Rollback any changes
-    session.close()  # Close session
+# @pytest.fixture(scope="module")
+# def db_session():
+#     """Creates a new database session for a test and ensures cleanup after the test."""
+#     session = SessionLocal()
+#     yield session  # Provide the session to the test
+#     session.rollback()  # Rollback any changes
+#     session.close()  # Close session
 
 
 def test_create_faq(db_session):
