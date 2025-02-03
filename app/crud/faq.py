@@ -1,21 +1,14 @@
-from google.cloud import translate_v2 as translate
+from app.utils.lang_utils import translate_text, check_language_code
 from sqlalchemy.orm import Session
 from app.models.faq import FAQ, FAQTranslation
 from app.config import DEFAULT_LANGUAGES
 from app.schemas.faq import FAQCreate
-import re
 from fastapi import HTTPException
 
 
-# Initialize the Google Translate API client
-translate_client = translate.Client()
-
-# Define a regex pattern for language codes (ISO 639-1)
-LANGUAGE_CODE_PATTERN = re.compile(r"^[a-z]{2}$")
-
 def create_faq(db: Session, faq: FAQCreate):
 
-    if not LANGUAGE_CODE_PATTERN.match(faq.language):
+    if not check_language_code(faq.language):
         raise HTTPException(status_code=400, detail="Invalid language format. Use a two-letter code (e.g., 'en', 'fr').")
 
     # Insert into FAQ table
@@ -48,7 +41,3 @@ def create_faq(db: Session, faq: FAQCreate):
     db.commit()
     return new_faq
 
-def translate_text(text: str, target_language: str) -> str:
-    """Translates the given HTML text into the target language using Google Cloud Translation API."""
-    result = translate_client.translate(text, target_language=target_language)
-    return result['translatedText']
