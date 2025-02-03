@@ -6,6 +6,17 @@ from app.models.faq import FAQ, FAQTranslation
 
 client = TestClient(app)
 
+EXPECTED_TRANSLATIONS = {
+    "bn": {
+        "question": "আমার নাম কি?",
+        "answer": "আমার নাম <b>জন ডো</b>"
+    },
+    "hi": {
+        "question": "मेरा नाम क्या है?",
+        "answer": "मेरा नाम <b>जॉन डो</b> है"
+    }
+}
+
 
 @pytest.fixture(scope="module")
 def db_session():
@@ -17,8 +28,6 @@ def db_session():
 
 
 def test_create_faq(db_session):
-    # from pdb import set_trace 
-    # set_trace()
     # Prepare the data for the FAQ creation
     faq_data = {
         "question": "What is my name?",
@@ -28,9 +37,8 @@ def test_create_faq(db_session):
 
     # Send POST request to create FAQ
     response = client.post("/faqs/", json=faq_data)
-
     # Assert the response status code
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json()["question"] == faq_data["question"]
     assert response.json()["answer"] == faq_data["answer"]
 
@@ -47,10 +55,17 @@ def test_create_faq(db_session):
 
     assert faq_translations is not None
     assert len(faq_translations) > 0  # Ensure at least one translation exists
+
     for translation in faq_translations:
         assert translation.language != faq_data["language"]  # Ensure translations are in different languages
         assert translation.question is not None
         assert translation.answer is not None
+
+        # Validate translation correctness
+        if translation.language in EXPECTED_TRANSLATIONS:
+            expected = EXPECTED_TRANSLATIONS[translation.language]
+            assert translation.question == expected["question"], f"Mismatch in {translation.language} question"
+            assert translation.answer == expected["answer"], f"Mismatch in {translation.language} answer"
 
     # Cleanup: Delete FAQTranslation entries first (to maintain foreign key constraints)
     for translation in faq_translations:

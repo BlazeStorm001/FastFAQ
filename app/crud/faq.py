@@ -20,8 +20,12 @@ def create_faq(db: Session, faq: FAQCreate):
             # Translate the question and answer directly including HTML
             translated_question = translate_text(faq.question, lang)
             translated_answer = translate_text(faq.answer, lang)
-            print(translated_answer)
-            print(translated_question)
+
+            # print(f"Translated question ({lang}): {translated_question}")
+            # print(f"Translated answer ({lang}): {translated_answer}")
+            # from pdb import set_trace 
+            # set_trace()
+    
             # Create and insert the translation entry
             faq_translation = FAQTranslation(
                 faq_id=new_faq.id, 
