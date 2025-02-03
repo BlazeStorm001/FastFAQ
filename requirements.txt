@@ -12,11 +12,11 @@ exceptiongroup==1.2.2
 fastapi==0.115.8
 fastapi-cache2==0.2.2
 greenlet==3.1.1
-h11==0.9.0
+h11
 h2==3.2.0
 hpack==3.0.0
 hstspreload==2025.1.1
-httpcore==0.9.1
+httpcore
 httpx==0.27.2
 hyperframe==5.2.0
 idna==2.10
@@ -48,4 +48,4 @@ uvicorn==0.34.0
 google-cloud-translate
 ruff
 pre-commit
-
+redis
