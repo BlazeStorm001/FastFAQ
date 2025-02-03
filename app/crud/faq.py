@@ -4,9 +4,10 @@ from app.models.faq import FAQ, FAQTranslation
 from app.config import DEFAULT_LANGUAGES
 from app.schemas.faq import FAQCreate
 from fastapi import HTTPException
+from typing import List, Optional
 
 
-def create_faq(db: Session, faq: FAQCreate):
+def create_faq(db: Session, faq: FAQCreate) -> FAQ:
 
     if not check_language_code(faq.language):
         raise HTTPException(status_code=400, detail="Invalid language format. Use a two-letter code (e.g., 'en', 'fr').")
@@ -41,3 +42,60 @@ def create_faq(db: Session, faq: FAQCreate):
     db.commit()
     return new_faq
 
+def get_faqs(db: Session, id: Optional[int] = None, lang: str = 'en') -> List[FAQ]:
+    """
+    Fetch FAQ(s) from the database based on language.
+
+    Args:
+        db: Database session.
+        id: FAQ ID (optional, if None, fetch all FAQs).
+        lang: Language for filtering FAQs.
+
+    Returns:
+        A list of FAQs.
+    """
+    if id:
+        # Fetch a specific FAQ by ID and language
+        faq = db.query(FAQ).filter(FAQ.id == id).first()
+
+        if not faq:
+            return []
+
+        if faq.language == lang:
+            return [faq]
+
+
+        if faq.language != lang:
+            # Fetch translation if requested language is different from the FAQ language
+            translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == id, FAQTranslation.language == lang).first()
+            if not translation:
+                if faq.language == 'en':
+                    return [faq]
+                else:
+                    translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == id, FAQTranslation.language == 'en').first()
+
+            faq = FAQ(id=id, question=translation.question, answer=translation.answer, language=lang)
+            return [faq] if faq else []
+
+    else:
+        # Fetch all FAQs in the requested language
+        faqs = db.query(FAQ).all()
+
+        result = []
+
+        for faq in faqs:
+
+            if faq.language == lang:
+                result.append(faq)
+            else:
+                translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == faq.id, FAQTranslation.language == lang).first()
+                if not translation:
+                    if faq.language == 'en':
+                        result.append(faq)
+                        continue
+                    else:
+                        translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == faq.id, FAQTranslation.language == 'en').first()
+                result.append(FAQ(id=faq.id, question=translation.question, answer=translation.answer, language=lang))
+
+
+        return result
