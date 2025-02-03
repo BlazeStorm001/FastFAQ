@@ -8,8 +8,11 @@ __pycache__/
 *.pyo
 *.pyd
 
-#pytest
+# pytest
 .pytest_cache/
 
 # gcp service acc creds
 gcp_cred.json
+
+# ruff cache
+.ruff_cache/
