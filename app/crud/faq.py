@@ -3,11 +3,21 @@ from sqlalchemy.orm import Session
 from app.models.faq import FAQ, FAQTranslation
 from app.config import DEFAULT_LANGUAGES
 from app.schemas.faq import FAQCreate
+import re
+from fastapi import HTTPException
+
 
 # Initialize the Google Translate API client
 translate_client = translate.Client()
 
+# Define a regex pattern for language codes (ISO 639-1)
+LANGUAGE_CODE_PATTERN = re.compile(r"^[a-z]{2}$")
+
 def create_faq(db: Session, faq: FAQCreate):
+
+    if not LANGUAGE_CODE_PATTERN.match(faq.language):
+        raise HTTPException(status_code=400, detail="Invalid language format. Use a two-letter code (e.g., 'en', 'fr').")
+
     # Insert into FAQ table
     new_faq = FAQ(question=faq.question, answer=faq.answer, language=faq.language)
     db.add(new_faq)
