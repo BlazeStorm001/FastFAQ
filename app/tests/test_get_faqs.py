@@ -2,7 +2,6 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.models.faq import FAQ, FAQTranslation
-from pdb import set_trace
 
 client = TestClient(app)
 
@@ -61,7 +60,7 @@ def test_get_all_faqs_in_english(setup_and_teardown):
 
 def test_get_faq_by_id_in_english(setup_and_teardown):
     _, faq2_id = setup_and_teardown
-    set_trace()
+    # set_trace()
     response = client.get(f"/api/faqs/?id={faq2_id}")
     assert response.status_code == 200
     faq = response.json()
@@ -81,7 +80,7 @@ def test_get_all_faqs_in_hindi(setup_and_teardown):
 
 def test_get_faq_by_id_in_hindi(setup_and_teardown):
     _, faq2_id = setup_and_teardown
-    set_trace()
+    # set_trace()
     response = client.get(f"/api/faqs/?id={faq2_id}&lang=hi")
     assert response.status_code == 200
     faq = response.json()

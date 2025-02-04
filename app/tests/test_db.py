@@ -1,14 +1,6 @@
 from app.models.faq import FAQ
 
-# @pytest.fixture(scope="function")
-# def db_session():
-#     """Creates a new database session for a test and ensures cleanup after the test."""
-#     session = SessionLocal()
-#     yield session  # Provide the session to the test
-#     session.rollback()  # Rollback any changes
-#     session.close()  # Close session
-
-def test_create_faq(db_session):
+def test_db(db_session):
     """Test FAQ creation and ensure cleanup after test"""
     faq = FAQ(question="What is FastAPI?", answer="A modern web framework for APIs.", language="en")
 
