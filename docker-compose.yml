@@ -10,10 +10,10 @@ services:
       - db
       - redis
     environment:
-      DATABASE_URL=postgresql://admin:pass@db:5432/faqdb
-      GOOGLE_APPLICATION_CREDENTIALS=/app/gcp_cred.json
-      REDIS_HOST=redis
-      REDIS_PORT=6379
+      DATABASE_URL: postgresql://admin:pass@db:5432/faqdb
+      GOOGLE_APPLICATION_CREDENTIALS: /app/gcp_cred.json
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     volumes:
       - .:/app  # Enable syncing between host and container
 
