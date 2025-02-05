@@ -8,13 +8,14 @@ from sqlalchemy.orm import Session
 from typing import List
 from fastapi import HTTPException
 from typing import Optional
+from fastapi import BackgroundTasks
 
 router = APIRouter()
 
 
 @router.post("/faqs/", response_model=FAQ, status_code=201)
-def create_faq_endpoint(faq: FAQCreate, db: Session = Depends(get_db)):
-    return create_faq(db, faq)
+def create_faq_endpoint(faq: FAQCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    return create_faq(db, faq, background_tasks)
 
 
 @router.get("/faqs/", response_model=List[FAQ])
