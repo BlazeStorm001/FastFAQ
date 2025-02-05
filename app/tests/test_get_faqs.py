@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.models.faq import FAQ, FAQTranslation
+from app.caching import flush_all_faqs
 
 client = TestClient(app)
 
@@ -45,6 +46,9 @@ def setup_and_teardown(db_session):
         (FAQ.id == faq1.id) | (FAQ.id == faq2.id)
     ).delete()
     db_session.commit()
+
+    # flush redis cache
+    flush_all_faqs()
 
 def test_get_all_faqs_in_english(setup_and_teardown):
     response = client.get("/api/faqs/")

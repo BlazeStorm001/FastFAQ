@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database.session import Base
-
+import json
 class FAQ(Base):
     """
     FAQ model to store the main FAQ information (question and answer in a default language).
@@ -15,6 +15,14 @@ class FAQ(Base):
     language = Column(String(10), default='en', nullable=False)  # Default to English
 
     translations = relationship('FAQTranslation', back_populates='faq')
+
+    def serialize(self):
+        return json.dumps({
+            'id': self.id,
+            'question': self.question,
+            'answer': self.answer,
+            'language': self.language
+        })
 
 class FAQTranslation(Base):
     """

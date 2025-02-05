@@ -5,9 +5,7 @@ from app.config import DEFAULT_LANGUAGES
 from app.schemas.faq import FAQCreate
 from fastapi import HTTPException
 from typing import List, Optional
-import json
-from app.dependencies import redis_client
-
+from app.caching import get_faqs_from_cache, add_faqs_to_cache, flush_all_faqs
 
 def create_faq(db: Session, faq: FAQCreate) -> FAQ:
 
@@ -42,6 +40,9 @@ def create_faq(db: Session, faq: FAQCreate) -> FAQ:
             db.add(faq_translation)
 
     db.commit()
+
+    flush_all_faqs()
+
     return new_faq
 
 def get_faqs(db: Session, id: Optional[int] = None, lang: str = 'en') -> List[FAQ]:
@@ -56,11 +57,12 @@ def get_faqs(db: Session, id: Optional[int] = None, lang: str = 'en') -> List[FA
     Returns:
         A list of FAQs.
     """
-    cache_key = f"faq:{id}:{lang}" if id else f"faqs:{lang}"
-    cached_faqs = redis_client.get(cache_key)
+    cached_entries = get_faqs_from_cache(id=id, lang=lang)
 
-    if cached_faqs:
-        return [FAQ(**faq) for faq in json.loads(cached_faqs)]
+    if cached_entries:
+        print("Cache hit")
+        return cached_entries
+
 
     if id:
         # Fetch a specific FAQ by ID and language
@@ -70,7 +72,6 @@ def get_faqs(db: Session, id: Optional[int] = None, lang: str = 'en') -> List[FA
             return []
 
         if faq.language == lang:
-            redis_client.set(cache_key, json.dumps([faq.__dict__]))
             return [faq]
 
         if faq.language != lang:
@@ -78,13 +79,11 @@ def get_faqs(db: Session, id: Optional[int] = None, lang: str = 'en') -> List[FA
             translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == id, FAQTranslation.language == lang).first()
             if not translation:
                 if faq.language == 'en':
-                    redis_client.set(cache_key, json.dumps([faq.__dict__]))
                     return [faq]
                 else:
                     translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == id, FAQTranslation.language == 'en').first()
 
             faq = FAQ(id=id, question=translation.question, answer=translation.answer, language=lang)
-            redis_client.set(cache_key, json.dumps([faq.__dict__]))
             return [faq] if faq else []
 
     else:
@@ -106,5 +105,6 @@ def get_faqs(db: Session, id: Optional[int] = None, lang: str = 'en') -> List[FA
                         translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == faq.id, FAQTranslation.language == 'en').first()
                 result.append(FAQ(id=faq.id, question=translation.question, answer=translation.answer, language=lang))
 
-        redis_client.set(cache_key, json.dumps([faq.__dict__ for faq in result]))
+        add_faqs_to_cache(result)
+
         return result
