@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from fastapi import Depends
 from app.schemas.faq import FAQCreate, FAQ
-from app.crud.faq import create_faq
-from app.crud.faq import get_faqs
+from app.crud.faqs.create import create_faq
+from app.crud.faqs.read import get_faqs
 from app.dependencies import get_db
 from sqlalchemy.orm import Session
 from typing import List
