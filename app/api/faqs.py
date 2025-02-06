@@ -3,6 +3,7 @@ from fastapi import Depends
 from app.schemas.faq import FAQCreate, FAQ
 from app.crud.faqs.create import create_faq
 from app.crud.faqs.read import get_faqs
+from app.crud.faqs.delete import delete_faq
 from app.dependencies import get_db
 from sqlalchemy.orm import Session
 from typing import List
@@ -28,3 +29,7 @@ def get_faqs_by_id_and_language(id: Optional[int] = None, lang: str = 'en', db: 
     if not faqs:
         raise HTTPException(status_code=404, detail="FAQ not found")
     return faqs
+
+@router.delete("/faqs/{id}", status_code=204)
+def delete_faq_endpoint(id: int, db: Session = Depends(get_db)):
+    return delete_faq(db, id)
