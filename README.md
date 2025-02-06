@@ -205,6 +205,60 @@ Retrieves an FAQ by ID in the requested language. If the requested language vers
 
 ---
 
+### 5. Update an FAQ by ID
+#### **Endpoint**
+```http
+PUT /api/faqs/{id}
+```
+#### **Description**
+Updates an existing FAQ by its unique ID.
+
+#### **Parameters**
+| Parameter | Type       | Required | Description                |
+|-----------|------------|----------|----------------------------|
+| `id`      | `int`      | Yes      | The unique ID of the FAQ   |
+
+#### **Request Body**
+```json
+{
+    "question": "Updated question?",
+    "answer": "Updated answer.",
+    "language": "en"
+}
+```
+
+#### **Response**
+```json
+{
+    "id": 1,
+    "question": "Updated question?",
+    "answer": "Updated answer.",
+    "language": "en"
+}
+```
+- `404 Not Found` if the FAQ ID does not exist.
+
+---
+
+### 6. Delete an FAQ by ID
+#### **Endpoint**
+```http
+DELETE /api/faqs/{id}
+```
+#### **Description**
+Deletes an FAQ by its unique ID.
+
+#### **Parameters**
+| Parameter | Type  | Required | Description                |
+|-----------|-------|----------|----------------------------|
+| `id`      | `int` | Yes      | The unique ID of the FAQ   |
+
+#### **Response**
+- `204 No Content` if the deletion is successful.
+- `404 Not Found` if the FAQ ID does not exist.
+
+---
+
 ## Example Usage
 
 **Get all FAQs in English**
