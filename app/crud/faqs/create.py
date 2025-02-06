@@ -9,13 +9,13 @@ from fastapi import BackgroundTasks
 
 
 
-def create_faq(db: Session, faq: FAQCreate, background_tasks: BackgroundTasks) -> FAQ:
+def create_faq(db: Session, faq: FAQCreate, background_tasks: BackgroundTasks, id: int = None) -> FAQ:
 
     if not check_language_code(faq.language):
         raise HTTPException(status_code=400, detail="Invalid language format. Use a two-letter code (e.g., 'en', 'fr').")
 
     # Insert into FAQ table
-    new_faq = FAQ(question=faq.question, answer=faq.answer, language=faq.language)
+    new_faq = FAQ(id=id, question=faq.question, answer=faq.answer, language=faq.language)
     db.add(new_faq)
     db.commit()
     db.refresh(new_faq)
