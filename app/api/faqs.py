@@ -4,6 +4,7 @@ from app.schemas.faq import FAQCreate, FAQ
 from app.crud.faqs.create import create_faq
 from app.crud.faqs.read import get_faqs
 from app.crud.faqs.delete import delete_faq
+from app.crud.faqs.update import update_faq
 from app.dependencies import get_db
 from sqlalchemy.orm import Session
 from typing import List
@@ -33,3 +34,7 @@ def get_faqs_by_id_and_language(id: Optional[int] = None, lang: str = 'en', db: 
 @router.delete("/faqs/{id}", status_code=204)
 def delete_faq_endpoint(id: int, db: Session = Depends(get_db)):
     return delete_faq(db, id)
+
+@router.put("/faqs/{id}", response_model=FAQ)
+def update_faq_endpoint(id: int, faq: FAQCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    return update_faq(db, id, faq, background_tasks)
