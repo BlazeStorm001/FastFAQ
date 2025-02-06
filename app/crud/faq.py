@@ -57,53 +57,49 @@ def get_faqs(db: Session, id: Optional[int] = None, lang: str = 'en') -> List[FA
         A list of FAQs.
     """
     cached_entries = get_faqs_from_cache(id=id, lang=lang)
-
     if cached_entries:
-        # print("Cache hit")
         return cached_entries
 
-
     if id:
-        # Fetch a specific FAQ by ID and language
-        faq = db.query(FAQ).filter(FAQ.id == id).first()
-
-        if not faq:
-            return []
-
-        if faq.language == lang:
-            return [faq]
-
-        if faq.language != lang:
-            # Fetch translation if requested language is different from the FAQ language
-            translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == id, FAQTranslation.language == lang).first()
-            if not translation:
-                if faq.language == 'en':
-                    return [faq]
-                else:
-                    translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == id, FAQTranslation.language == 'en').first()
-
-            faq = FAQ(id=id, question=translation.question, answer=translation.answer, language=lang)
-            return [faq] if faq else []
-
+        return get_faq_by_id(db, id, lang)
     else:
-        # Fetch all FAQs in the requested language
-        faqs = db.query(FAQ).all()
+        return get_all_faqs(db, lang)
 
-        result = []
 
-        for faq in faqs:
-            if faq.language == lang:
-                result.append(faq)
-            else:
-                translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == faq.id, FAQTranslation.language == lang).first()
-                if not translation:
-                    if faq.language == 'en':
-                        result.append(faq)
-                        continue
-                    else:
-                        translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == faq.id, FAQTranslation.language == 'en').first()
-                result.append(FAQ(id=faq.id, question=translation.question, answer=translation.answer, language=lang))
+def get_faq_by_id(db: Session, id: int, lang: str) -> List[FAQ]:
+    """Fetch a specific FAQ by ID, with translation handling."""
+    faq = db.query(FAQ).filter(FAQ.id == id).first()
+    if not faq:
+        return []
 
-        add_faqs_to_cache(result)
+    if faq.language == lang:
+        return [faq]
 
-        return result
+    return [get_faq_translation(db, faq, lang)]
+
+
+def get_faq_translation(db: Session, faq: FAQ, lang: str) -> FAQ:
+    """Fetch the translation of an FAQ. Defaults to English if the requested language is missing."""
+    translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == faq.id, FAQTranslation.language == lang).first()
+
+    if not translation:
+        if faq.language == 'en':
+            return faq
+        translation = db.query(FAQTranslation).filter(FAQTranslation.faq_id == faq.id, FAQTranslation.language == 'en').first()
+
+    return FAQ(id=faq.id, question=translation.question, answer=translation.answer, language=lang)
+
+
+def get_all_faqs(db: Session, lang: str) -> List[FAQ]:
+    """Fetch all FAQs in the requested language, handling translations."""
+    faqs = db.query(FAQ).all()
+    result = []
+
+    for faq in faqs:
+        if faq.language == lang:
+            result.append(faq)
+        else:
+            result.append(get_faq_translation(db, faq, lang))
+
+    add_faqs_to_cache(result)
+    return result
