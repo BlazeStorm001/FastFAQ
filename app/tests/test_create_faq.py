@@ -8,7 +8,7 @@ client = TestClient(app)
 EXPECTED_TRANSLATIONS = {
     "bn": {
         "question": "আমার নাম কি?",
-        "answer": "আমার নাম <b>জন ডো</b>"
+        "answer": "আমার নাম <b>জন ডো।</b>"
     },
     "hi": {
         "question": "मेरा नाम क्या है?",
