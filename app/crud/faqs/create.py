@@ -19,7 +19,7 @@ def create_faq(db: Session, faq: FAQCreate, background_tasks: BackgroundTasks, i
     db.add(new_faq)
     db.commit()
     db.refresh(new_faq)
-
+    flush_all_faqs()
 
     # Add the background task
     background_tasks.add_task(create_translations, db, new_faq.id, faq.question, faq.answer, faq.language)
@@ -45,4 +45,4 @@ def create_translations(db: Session, new_faq_id: int, faq_question: str, faq_ans
             db.add(faq_translation)
 
     db.commit()
-    flush_all_faqs()
+
